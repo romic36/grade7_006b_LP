@@ -3,353 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Computer Education Curriculum</title>
+    <title>Interactive Lesson Plan: Intro to Desktop Publishing</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chosen Palette: Calm Harmony -->
-    <!-- Application Structure Plan: The application uses a top-level tabbed navigation to switch between Grade Levels (7-10), as this is the primary organizational structure of the source report. This is more intuitive than a single, long scrolling page. Within each grade, a timeline visualization provides a quick overview of the year's topics. The core content is presented in a card-based layout, grouped by quarters within an accordion, making the dense weekly information digestible. A key interaction is the "Highlight AI Lessons" toggle, which allows educators to instantly see the AI curriculum thread, a major theme of the report. This structure was chosen to facilitate both high-level exploration (via timeline and grade tabs) and detailed examination (via weekly cards) in a user-friendly, interactive manner. -->
+    <!-- Chosen Palette: Serene Teal and Slate -->
+    <!-- Application Structure Plan: The application presents the lesson plan in a clear, linear, and interactive format designed for an educator. It starts with static, at-a-glance sections for Objectives and Materials. The core of the application is a vertical, interactive timeline for the Lesson Procedure. This structure was chosen because a lesson plan is a chronological sequence of events. The timeline visually represents this flow, and the click-to-expand interaction allows the teacher to focus on one part of the lesson at a time, preventing information overload while keeping the overall structure visible. -->
     <!-- Visualization & Content Choices: 
-        - Report Info: Hierarchical curriculum (Grade > Quarter > Week) -> Goal: Organize -> Viz: Tabbed navigation for Grades, Accordion for Quarters, Cards for Weeks -> Interaction: Click to navigate/expand -> Justification: Breaks down dense data into manageable, user-controlled chunks, superior to a static table. -> Method: HTML/CSS/JS.
-        - Report Info: Progression of major topics per year -> Goal: Show Change -> Viz: Horizontal Bar Chart (Timeline) -> Interaction: Static view per grade -> Justification: Provides a quick, high-level visual summary of the learning journey for the entire year. -> Library: Chart.js.
-        - Report Info: Recurring "Additional AI Lessons" -> Goal: Highlight a key theme -> Viz: Visual highlighting (background color/border) on weekly cards -> Interaction: On/Off Toggle Switch -> Justification: Allows users to easily track the integration and progression of the AI curriculum, a core feature of the report. -> Method: JS class toggling.
-        - Report Info: Weekly details (Topic, Activity, Assessment) -> Goal: Inform -> Viz: Structured content cards with icons -> Interaction: None (static display) -> Justification: Cards are more visually appealing and scannable than table rows, clearly delineating information for each week. -> Method: HTML/Tailwind CSS.
+        - Report Info: Lesson Objectives & Materials -> Goal: Inform -> Viz: Styled lists with icons -> Interaction: Static -> Justification: Provides a clear, scannable checklist for the teacher before the lesson begins. -> Method: HTML/Tailwind.
+        - Report Info: Chronological Lesson Procedure -> Goal: Organize/Show Flow -> Viz: Vertical timeline/stepper -> Interaction: Click on a step to expand its details -> Justification: This is the most intuitive way to represent a time-based process. It allows for progressive disclosure of content, which is a key UX principle for simplifying complex information. -> Method: HTML/Tailwind/JS.
+        - Report Info: Specific activities (e.g., Hook, Guided Inquiry) -> Goal: Inform -> Viz: Detailed content cards within each expanded timeline step -> Interaction: Displayed on expand -> Justification: Organizes the granular details of the lesson in a structured way, visible only when needed. -> Method: HTML/Tailwind.
+        - Report Info: AI in Design section -> Goal: Highlight -> Viz: A special icon and color treatment on the timeline step -> Interaction: Click to expand -> Justification: Visually flags this special topic for the teacher within the lesson flow. -> Method: HTML/Tailwind.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
         }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        .nav-btn {
-            transition: all 0.3s ease;
-        }
-        .nav-btn.active {
-            background-color: #0d9488; /* teal-600 */
-            color: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        .accordion-content {
+        .timeline-item-content {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.5s ease-out;
+            transition: max-height 0.5s ease-in-out;
         }
-        .ai-highlight {
-            background-color: #fef9c3 !important; /* yellow-100 */
-            border: 1px solid #fde047; /* yellow-300 */
+        .timeline-item-trigger.active .timeline-dot {
+            background-color: #0d9488; /* teal-600 */
+            transform: scale(1.25);
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 200px;
-            max-height: 200px;
+        .timeline-item-trigger.active h3 {
+            color: #0d9488; /* teal-600 */
         }
-        .card-icon {
-            width: 1.25rem;
-            height: 1.25rem;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
+        .timeline-dot {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="text-slate-700">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-teal-800 mb-2">Interactive Computer Education Curriculum</h1>
-            <p class="text-slate-600">An explorable guide to the Grade 7-10 Computer Education long-range plan, with a focus on AI integration.</p>
+    <div class="container mx-auto max-w-4xl p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-800 mb-2">Interactive Lesson Plan</h1>
+            <p class="text-xl text-slate-600">Grade 7: Introduction to Desktop Publishing (Canva)</p>
         </header>
 
-        <nav class="flex justify-center flex-wrap gap-2 mb-8">
-            <button id="btn-grade7" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 7</button>
-            <button id="btn-grade8" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 8</button>
-            <button id="btn-grade9" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 9</button>
-            <button id="btn-grade10" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 10</button>
-        </nav>
+        <main class="space-y-12">
+            <!-- Objectives Section -->
+            <section>
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lesson Objectives
+                </h2>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <p class="mb-4">At the end of this 40-minute lesson, students will be able to:</p>
+                    <ul class="space-y-2 list-inside">
+                        <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span> Define what desktop publishing is and give examples of its use.</li>
+                        <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span> Identify the basic interface elements of Canva for Education.</li>
+                        <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span> Explain the purpose and function of templates in graphic design.</li>
+                        <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span> Participate in a guided activity to explore templates and design ideas.</li>
+                    </ul>
+                </div>
+            </section>
 
-        <main id="content-area">
-            <!-- Grade level content will be injected here -->
+            <!-- Materials Section -->
+            <section>
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Materials Required
+                </h2>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-slate-50 rounded-md"><strong>LCD Projector</strong></div>
+                    <div class="p-4 bg-slate-50 rounded-md"><strong>Whiteboard</strong></div>
+                    <div class="p-4 bg-slate-50 rounded-md"><strong>Marker</strong></div>
+                    <div class="p-4 bg-slate-50 rounded-md"><strong>Paper for Students</strong></div>
+                </div>
+            </section>
+
+            <!-- Lesson Procedure Section -->
+            <section>
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Lesson Procedure (40 Minutes)
+                </h2>
+                <p class="text-slate-600 mb-8 -mt-4">Click on each step below to view the detailed activities and instructions for that part of the lesson.</p>
+                <div id="timeline-container" class="relative">
+                    <!-- Vertical line -->
+                    <div class="absolute left-5 top-0 h-full w-0.5 bg-slate-200"></div>
+
+                    <!-- Timeline Item 1: Introduction -->
+                    <div class="timeline-item pl-12 mb-8 relative">
+                        <div class="timeline-item-trigger cursor-pointer">
+                            <div class="timeline-dot absolute left-5 -translate-x-1/2 top-1 w-5 h-5 bg-slate-300 rounded-full border-4 border-slate-50"></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-slate-800 transition-colors">I. Introduction</h3>
+                                <span class="font-semibold text-slate-500">5 Mins</span>
+                            </div>
+                        </div>
+                        <div class="timeline-item-content">
+                            <div class="bg-white mt-4 p-6 rounded-lg shadow-sm border border-slate-200 space-y-4">
+                                <div>
+                                    <h4 class="font-bold text-teal-700">Hook (2 mins)</h4>
+                                    <p>Begin by asking students to look at posters, flyers, or invitations. Ask: "How do you think these things are made? What tools do people use to combine text, images, and colors to create them?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-teal-700">Topic Introduction (3 mins)</h4>
+                                    <p>Introduce the concept of <strong>Desktop Publishing (DTP)</strong> as the process of using a computer and software to create visual documents. Explain that today, they'll learn about a powerful tool called <strong>Canva for Education</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 2: Exploring the Canva Interface -->
+                    <div class="timeline-item pl-12 mb-8 relative">
+                        <div class="timeline-item-trigger cursor-pointer">
+                             <div class="timeline-dot absolute left-5 -translate-x-1/2 top-1 w-5 h-5 bg-slate-300 rounded-full border-4 border-slate-50"></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-slate-800 transition-colors">II. Exploring the Canva Interface</h3>
+                                <span class="font-semibold text-slate-500">10 Mins</span>
+                            </div>
+                        </div>
+                         <div class="timeline-item-content">
+                            <div class="bg-white mt-4 p-6 rounded-lg shadow-sm border border-slate-200 space-y-4">
+                                <div>
+                                    <h4 class="font-bold text-teal-700">Teacher's Role & Activity</h4>
+                                    <p>Project the Canva homepage. As you navigate, point to and explain the main parts of the interface:</p>
+                                    <ul class="list-disc list-outside ml-5 mt-2 space-y-1">
+                                        <li><strong>Homepage:</strong> Show recent designs, folders, and main navigation.</li>
+                                        <li><strong>Search Bar:</strong> Explain its power for finding design types or ideas.</li>
+                                        <li><strong>Left-Hand Panel:</strong> Point out "Templates," "Elements," "Text," and "Uploads" as their "toolboxes."</li>
+                                        <li><strong>Filipino Context:</strong> Demonstrate a search for a relevant Filipino theme (e.g., "Buwan ng Wika") to make it relatable.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 3: Exploring Templates -->
+                    <div class="timeline-item pl-12 mb-8 relative">
+                        <div class="timeline-item-trigger cursor-pointer">
+                             <div class="timeline-dot absolute left-5 -translate-x-1/2 top-1 w-5 h-5 bg-slate-300 rounded-full border-4 border-slate-50"></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-slate-800 transition-colors">III. Exploring Templates</h3>
+                                <span class="font-semibold text-slate-500">15 Mins</span>
+                            </div>
+                        </div>
+                        <div class="timeline-item-content">
+                           <div class="bg-white mt-4 p-6 rounded-lg shadow-sm border border-slate-200 space-y-4">
+                                <div>
+                                    <h4 class="font-bold text-teal-700">Teacher's Role & Activity</h4>
+                                    <p>Continue the live demonstration, explaining that templates are pre-made, customizable designs that save time and effort.</p>
+                                    <ol class="list-decimal list-outside ml-5 mt-2 space-y-1">
+                                        <li>Search for various poster templates related to school events or Filipino festivals.</li>
+                                        <li>Open a few different templates to show the class what they look like.</li>
+                                        <li><strong>Guided Inquiry:</strong> Ask students which templates they like and why. Ask them to identify the different elements (text, images, background).</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 4: AI in Design -->
+                    <div class="timeline-item pl-12 mb-8 relative">
+                        <div class="timeline-item-trigger cursor-pointer">
+                             <div class="absolute left-5 -translate-x-1/2 top-1 w-5 h-5 bg-amber-300 rounded-full border-4 border-slate-50 timeline-dot"></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-slate-800 transition-colors flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                    IV. Bonus: Introduction to AI in Design
+                                </h3>
+                                <span class="font-semibold text-slate-500">5 Mins</span>
+                            </div>
+                        </div>
+                         <div class="timeline-item-content">
+                           <div class="bg-amber-50 border-amber-200 mt-4 p-6 rounded-lg shadow-sm border space-y-4">
+                                <div>
+                                    <h4 class="font-bold text-amber-800">Teacher's Role & Activity</h4>
+                                    <p>Briefly introduce the concept of <strong>AI in Design</strong>. Explain that some tools in Canva use artificial intelligence. Mention features like "Magic Edit" (which can remove or replace objects) to illustrate how AI makes design easier and faster. Note that this is a preview for future hands-on lessons.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 5: Conclusion & Assessment -->
+                    <div class="timeline-item pl-12 relative">
+                        <div class="timeline-item-trigger cursor-pointer">
+                             <div class="timeline-dot absolute left-5 -translate-x-1/2 top-1 w-5 h-5 bg-slate-300 rounded-full border-4 border-slate-50"></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-slate-800 transition-colors">V. Conclusion & Assessment</h3>
+                                <span class="font-semibold text-slate-500">5 Mins</span>
+                            </div>
+                        </div>
+                         <div class="timeline-item-content">
+                            <div class="bg-white mt-4 p-6 rounded-lg shadow-sm border border-slate-200 space-y-4">
+                                <div>
+                                    <h4 class="font-bold text-teal-700">Review (2 mins)</h4>
+                                    <p>Do a quick recap. Ask students to name one thing they learned about the Canva interface and one thing they learned about templates.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-teal-700">Assessment Activity (3 mins)</h4>
+                                    <p>Distribute blank paper. Ask students to imagine creating a poster for a school event and to:</p>
+                                    <ol class="list-decimal list-outside ml-5 mt-2 space-y-1">
+                                        <li>Write down the event title.</li>
+                                        <li>Sketch out their poster idea (text/image placement).</li>
+                                        <li>Write down which type of Canva template they would use to start.</li>
+                                    </ol>
+                                    <p class="mt-2">Collect the papers as a simple assessment of their understanding.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
         </main>
     </div>
 
     <script>
-        const curriculumData = {
-            grade7: {
-                title: "Grade 7: Foundational Skills & Digital Literacy",
-                intro: "The Grade 7 curriculum focuses on building fundamental computer skills, from basic operations and word processing to an initial exploration of desktop publishing. This year establishes a strong foundation in digital citizenship and introduces the concept of AI in everyday tools.",
-                timeline: {
-                    labels: ["Intro & Safety", "Word Processing (Google Docs)", "Desktop Publishing (Canva)", "Review"],
-                    data: [2, 3, 3, 1] 
-                },
-                quarters: {
-                    q1: {
-                        title: "First Quarter: Digital Fundamentals",
-                        weeks: [
-                            { week: 1, topic: "Introduction to Computers and Operating Systems", ai: null, activity: "Explore the Windows 11 desktop: Identify icons, taskbar, Start Menu.", assessment: "Q&A during discussion" },
-                            { week: 2, topic: "Digital Citizenship and Online Safety", ai: null, activity: "Discuss responsible online behavior, cyberbullying, and create a 'Digital Citizen Oath' poster.", assessment: "Short oral discussion" },
-                            { week: 3, topic: "Word Processing Fundamentals (Google Docs)", ai: null, activity: "Learn basic interface, creating, saving, and opening documents. Type a paragraph about 'My Favorite Filipino Food'.", assessment: "Document creation check" },
-                            { week: 4, topic: "Word Processing: Formatting Text", ai: null, activity: "Reformat the 'My Favorite Filipino Food' document with different fonts, sizes, and colors.", assessment: "Formatting exercise check" },
-                            { week: 5, topic: "Word Processing: Introduction to Lists", ai: "What is AI? (Simple explanation, everyday examples like voice assistants, recommendation systems)", activity: "Create lists of 'Filipino Values' and a guide for a Filipino snack. Discuss everyday AI examples.", assessment: "List creation exercise" },
-                            { week: 6, topic: "Introduction to Desktop Publishing (Canva)", ai: "AI in Design: Basic Image Generation/Enhancement", activity: "Explore Canva interface and templates. Experiment with basic AI image features in Canva.", assessment: "Template exploration activity" },
-                            { week: 7, topic: "Desktop Publishing: Adding Text & Images", ai: "Introduction to Large Language Models (LLMs)", activity: "Add text and images to a Canva template. Interact with a teacher-led LLM demonstration.", assessment: "Simple design element placement" },
-                            { week: 8, topic: "Desktop Publishing: Creating Simple Posters", ai: "Ethical AI: Bias in AI", activity: "Create a 'Buwan ng Wika' poster. Discuss scenarios where AI might be unfair.", assessment: "Poster/flyer creation project" },
-                            { week: 10, topic: "Review and Basic Skills Assessment", ai: "Review of AI Concepts (Q1)", activity: "Hands-on assessment creating a short document and a simple design.", assessment: "Practical Assessment" }
-                        ]
-                    },
-                }
-            },
-            grade8: {
-                title: "Grade 8: Productivity, Collaboration & Data",
-                intro: "The Grade 8 curriculum advances into more complex productivity tools, emphasizing collaboration and introducing the fundamentals of spreadsheets and databases. The AI track explores how artificial intelligence assists in design, data analysis, and ethical considerations like misinformation.",
-                timeline: {
-                    labels: ["Advanced DTP & Slides", "Collaboration", "Spreadsheets & Databases", "Review"],
-                    data: [4, 3, 9, 2]
-                },
-                quarters: {
-                    q1: {
-                        title: "First Quarter: Advanced Productivity & Collaboration",
-                        weeks: [
-                            { week: 2, topic: "Advanced Word Processing (Google Docs)", ai: "AI for Content Generation: Email/Letter Drafting", activity: "Use templates and mail merge concepts. Use an LLM to draft formal emails.", assessment: "Template/Mail Merge setup check" },
-                            { week: 3, topic: "Advanced Desktop Publishing (Canva)", ai: "AI for Image Manipulation: Advanced Canva AI Features", activity: "Create a multi-layered design for a 'Filipino Heroes Day' poster. Use Canva's AI features for image enhancement.", assessment: "Layer/Text formatting exercise" },
-                            { week: 5, topic: "Collaboration Tools (Google Slides)", ai: "AI in Presentations: Content & Design Suggestions", activity: "Create a presentation and use Google Slides' 'Explore' feature for design ideas about Philippine culture.", assessment: "Basic presentation creation" },
-                            { week: 8, topic: "Review of Productivity and Collaboration Tools", ai: "Ethical AI: Misinformation and Deepfakes", activity: "Comprehensive review. Discuss what deepfakes are and the importance of verifying information.", assessment: "Review activities" }
-                        ]
-                    },
-                }
-            },
-            grade9: {
-                title: "Grade 9: Databases, Security & Intro to AI/ML",
-                intro: "The Grade 9 curriculum delves into the structured world of relational databases and cybersecurity. A significant portion of the year is dedicated to introducing foundational programming with Python and the core concepts of Machine Learning, preparing students for more advanced topics.",
-                timeline: {
-                    labels: ["Databases & SQL", "Spreadsheets & Security", "Python & Machine Learning", "Review"],
-                    data: [6, 5, 7, 1]
-                },
-                 quarters: {
-                    q1: {
-                        title: "First Quarter: Database Fundamentals",
-                        weeks: [
-                            { week: 1, topic: "Introduction to Relational Databases", ai: "Data as Fuel for AI", activity: "Discuss real-world databases like school enrollment systems. Identify primary and foreign keys.", assessment: "Q&A on database concepts" },
-                            { week: 6, topic: "Querying Databases: Introduction to SQL", ai: "SQL and AI: How SQL is used to prepare data for AI models.", activity: "Practice simple SELECT statements in an online SQL sandbox. Discuss how data scientists use SQL.", assessment: "SQL SELECT practice" },
-                        ]
-                    },
-                }
-            },
-            grade10: {
-                title: "Grade 10: Advanced Programming & AI Applications",
-                intro: "The Grade 10 curriculum culminates in a capstone project, applying advanced Python programming, data analysis with Pandas, and machine learning concepts. Students explore emerging technologies and the ethical implications of AI, solidifying their comprehensive tech education.",
-                timeline: {
-                    labels: ["Advanced Python", "Data Analysis (Pandas)", "Machine Learning Models", "Capstone Project"],
-                    data: [8, 8, 8, 12]
-                },
-                 quarters: {
-                    q1: {
-                        title: "First Quarter: Advanced Python Programming",
-                        weeks: [
-                            { week: 3, topic: "Python Modules and Packages", ai: "Leveraging AI Libraries", activity: "Import and use functions from modules like math and random. Discuss analogy to importing AI libraries like TensorFlow.", assessment: "Module usage exercise" },
-                            { week: 6, topic: "Object-Oriented Programming (OOP) Concepts", ai: "Object-Oriented AI Design", activity: "Create a simple 'Student' class. Discuss how OOP principles structure large AI systems.", assessment: "Simple class creation" },
-                        ]
-                    },
-                }
-            }
-        };
+        document.addEventListener('DOMContentLoaded', function () {
+            const timelineItems = document.querySelectorAll('.timeline-item-trigger');
 
-        let currentGrade = 'grade7';
-        let isAiHighlighted = false;
-        let activeChart = null;
+            timelineItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const content = item.nextElementSibling;
+                    const isActive = item.classList.contains('active');
 
-        const contentArea = document.getElementById('content-area');
-        const gradeButtons = {
-            grade7: document.getElementById('btn-grade7'),
-            grade8: document.getElementById('btn-grade8'),
-            grade9: document.getElementById('btn-grade9'),
-            grade10: document.getElementById('btn-grade10'),
-        };
-
-        function createWeekCard(weekData) {
-            const aiSection = weekData.ai ? `
-                <div class="ai-lesson mt-3 pt-3 border-t border-slate-200">
-                    <div class="flex items-start">
-                        <span class="card-icon text-teal-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" /></svg>
-                        </span>
-                        <div>
-                            <h4 class="font-semibold text-sm text-teal-700">Additional AI Lesson</h4>
-                            <p class="text-sm text-slate-600">${weekData.ai}</p>
-                        </div>
-                    </div>
-                </div>` : '';
-
-            return `
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col">
-                    <div class="flex-grow">
-                        <p class="text-sm font-bold text-teal-600 mb-1">Week ${weekData.week}</p>
-                        <h3 class="font-bold text-slate-800 mb-3">${weekData.topic}</h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex items-start">
-                                <span class="card-icon text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg></span>
-                                <p><strong class="font-semibold text-slate-700">Activity:</strong> ${weekData.activity}</p>
-                            </div>
-                            <div class="flex items-start">
-                                <span class="card-icon text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
-                                <p><strong class="font-semibold text-slate-700">Assessment:</strong> ${weekData.assessment}</p>
-                            </div>
-                        </div>
-                    </div>
-                    ${aiSection}
-                </div>
-            `;
-        }
-        
-        function renderGrade(gradeId) {
-            const data = curriculumData[gradeId];
-            if (!data) return;
-
-            if (activeChart) {
-                activeChart.destroy();
-            }
-
-            let quartersHtml = '';
-            for (const qKey in data.quarters) {
-                const quarter = data.quarters[qKey];
-                const weeksHtml = quarter.weeks.map(createWeekCard).join('');
-                quartersHtml += `
-                    <div class="mb-4 border border-slate-200 rounded-lg bg-slate-100/50">
-                        <button class="accordion-toggle w-full text-left p-4 font-bold text-lg text-teal-800 flex justify-between items-center hover:bg-teal-50 rounded-t-lg">
-                            ${quarter.title}
-                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div class="accordion-content">
-                            <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                ${weeksHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            contentArea.innerHTML = `
-                <div id="${gradeId}-content" class="space-y-8">
-                    <section class="bg-white p-6 rounded-lg shadow-sm text-center">
-                        <h2 class="text-2xl font-bold text-slate-800 mb-2">${data.title}</h2>
-                        <p class="text-slate-600 max-w-3xl mx-auto">${data.intro}</p>
-                    </section>
-                    
-                    <section class="bg-white p-6 rounded-lg shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-slate-800">Yearly Topic Progression</h3>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-medium text-slate-700">Highlight AI Lessons</span>
-                                <label for="ai-toggle" class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="ai-toggle" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-teal-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="timeline-chart"></canvas>
-                        </div>
-                    </section>
-
-                    <section>
-                        ${quartersHtml}
-                    </section>
-                </div>
-            `;
-
-            const ctx = document.getElementById('timeline-chart').getContext('2d');
-            activeChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.timeline.labels,
-                    datasets: [{
-                        label: 'Weeks per Topic Block',
-                        data: data.timeline.data,
-                        backgroundColor: ['#14b8a6', '#2dd4bf', '#5eead4', '#99f6e4', '#ccfbf1'],
-                        borderColor: '#0f766e',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Approx. ${context.raw} weeks`;
-                                }
-                            }
+                    // Close all other items
+                    timelineItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.classList.remove('active');
+                            otherItem.nextElementSibling.style.maxHeight = null;
                         }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            title: { display: true, text: 'Approximate Number of Weeks' }
-                        }
-                    }
-                }
-            });
+                    });
 
-            document.querySelectorAll('.accordion-toggle').forEach(button => {
-                button.addEventListener('click', () => {
-                    const content = button.nextElementSibling;
-                    button.querySelector('svg').classList.toggle('rotate-180');
-                    if (content.style.maxHeight) {
+                    // Toggle the clicked item
+                    if (isActive) {
+                        item.classList.remove('active');
                         content.style.maxHeight = null;
                     } else {
-                        content.style.maxHeight = content.scrollHeight + "px";
+                        item.classList.add('active');
+                        content.style.maxHeight = content.scrollHeight + 'px';
                     }
                 });
             });
-            
-            const firstAccordion = document.querySelector('.accordion-toggle');
-            if(firstAccordion) {
-                firstAccordion.click();
+
+            // Automatically open the first item
+            if (timelineItems.length > 0) {
+                timelineItems[0].click();
             }
-
-            document.getElementById('ai-toggle').addEventListener('change', (e) => {
-                isAiHighlighted = e.target.checked;
-                updateAiHighlight();
-            });
-            
-            document.getElementById('ai-toggle').checked = isAiHighlighted;
-            updateAiHighlight();
-        }
-
-        function updateAiHighlight() {
-            document.querySelectorAll('.ai-lesson').forEach(el => {
-                const card = el.closest('.bg-white');
-                if (isAiHighlighted) {
-                    card.classList.add('ai-highlight');
-                } else {
-                    card.classList.remove('ai-highlight');
-                }
-            });
-        }
-
-        function setActiveButton(gradeId) {
-            Object.values(gradeButtons).forEach(btn => btn.classList.remove('active'));
-            if (gradeButtons[gradeId]) {
-                gradeButtons[gradeId].classList.add('active');
-            }
-        }
-
-        Object.keys(gradeButtons).forEach(gradeId => {
-            gradeButtons[gradeId].addEventListener('click', () => {
-                currentGrade = gradeId;
-                setActiveButton(gradeId);
-                renderGrade(gradeId);
-            });
         });
-
-        // Initial render
-        setActiveButton(currentGrade);
-        renderGrade(currentGrade);
-
     </script>
+
 </body>
 </html>
