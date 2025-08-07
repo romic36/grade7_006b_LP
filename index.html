@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Computer Education Curriculum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application uses a top-level tabbed navigation to switch between Grade Levels (7-10), as this is the primary organizational structure of the source report. This is more intuitive than a single, long scrolling page. Within each grade, a timeline visualization provides a quick overview of the year's topics. The core content is presented in a card-based layout, grouped by quarters within an accordion, making the dense weekly information digestible. A key interaction is the "Highlight AI Lessons" toggle, which allows educators to instantly see the AI curriculum thread, a major theme of the report. This structure was chosen to facilitate both high-level exploration (via timeline and grade tabs) and detailed examination (via weekly cards) in a user-friendly, interactive manner. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Hierarchical curriculum (Grade > Quarter > Week) -> Goal: Organize -> Viz: Tabbed navigation for Grades, Accordion for Quarters, Cards for Weeks -> Interaction: Click to navigate/expand -> Justification: Breaks down dense data into manageable, user-controlled chunks, superior to a static table. -> Method: HTML/CSS/JS.
+        - Report Info: Progression of major topics per year -> Goal: Show Change -> Viz: Horizontal Bar Chart (Timeline) -> Interaction: Static view per grade -> Justification: Provides a quick, high-level visual summary of the learning journey for the entire year. -> Library: Chart.js.
+        - Report Info: Recurring "Additional AI Lessons" -> Goal: Highlight a key theme -> Viz: Visual highlighting (background color/border) on weekly cards -> Interaction: On/Off Toggle Switch -> Justification: Allows users to easily track the integration and progression of the AI curriculum, a core feature of the report. -> Method: JS class toggling.
+        - Report Info: Weekly details (Topic, Activity, Assessment) -> Goal: Inform -> Viz: Structured content cards with icons -> Interaction: None (static display) -> Justification: Cards are more visually appealing and scannable than table rows, clearly delineating information for each week. -> Method: HTML/Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .ai-highlight {
+            background-color: #fef9c3 !important; /* yellow-100 */
+            border: 1px solid #fde047; /* yellow-300 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 200px;
+            max-height: 200px;
+        }
+        .card-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-800 mb-2">Interactive Computer Education Curriculum</h1>
+            <p class="text-slate-600">An explorable guide to the Grade 7-10 Computer Education long-range plan, with a focus on AI integration.</p>
+        </header>
+
+        <nav class="flex justify-center flex-wrap gap-2 mb-8">
+            <button id="btn-grade7" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 7</button>
+            <button id="btn-grade8" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 8</button>
+            <button id="btn-grade9" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 9</button>
+            <button id="btn-grade10" class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Grade 10</button>
+        </nav>
+
+        <main id="content-area">
+            <!-- Grade level content will be injected here -->
+        </main>
+    </div>
+
+    <script>
+        const curriculumData = {
+            grade7: {
+                title: "Grade 7: Foundational Skills & Digital Literacy",
+                intro: "The Grade 7 curriculum focuses on building fundamental computer skills, from basic operations and word processing to an initial exploration of desktop publishing. This year establishes a strong foundation in digital citizenship and introduces the concept of AI in everyday tools.",
+                timeline: {
+                    labels: ["Intro & Safety", "Word Processing (Google Docs)", "Desktop Publishing (Canva)", "Review"],
+                    data: [2, 3, 3, 1] 
+                },
+                quarters: {
+                    q1: {
+                        title: "First Quarter: Digital Fundamentals",
+                        weeks: [
+                            { week: 1, topic: "Introduction to Computers and Operating Systems", ai: null, activity: "Explore the Windows 11 desktop: Identify icons, taskbar, Start Menu.", assessment: "Q&A during discussion" },
+                            { week: 2, topic: "Digital Citizenship and Online Safety", ai: null, activity: "Discuss responsible online behavior, cyberbullying, and create a 'Digital Citizen Oath' poster.", assessment: "Short oral discussion" },
+                            { week: 3, topic: "Word Processing Fundamentals (Google Docs)", ai: null, activity: "Learn basic interface, creating, saving, and opening documents. Type a paragraph about 'My Favorite Filipino Food'.", assessment: "Document creation check" },
+                            { week: 4, topic: "Word Processing: Formatting Text", ai: null, activity: "Reformat the 'My Favorite Filipino Food' document with different fonts, sizes, and colors.", assessment: "Formatting exercise check" },
+                            { week: 5, topic: "Word Processing: Introduction to Lists", ai: "What is AI? (Simple explanation, everyday examples like voice assistants, recommendation systems)", activity: "Create lists of 'Filipino Values' and a guide for a Filipino snack. Discuss everyday AI examples.", assessment: "List creation exercise" },
+                            { week: 6, topic: "Introduction to Desktop Publishing (Canva)", ai: "AI in Design: Basic Image Generation/Enhancement", activity: "Explore Canva interface and templates. Experiment with basic AI image features in Canva.", assessment: "Template exploration activity" },
+                            { week: 7, topic: "Desktop Publishing: Adding Text & Images", ai: "Introduction to Large Language Models (LLMs)", activity: "Add text and images to a Canva template. Interact with a teacher-led LLM demonstration.", assessment: "Simple design element placement" },
+                            { week: 8, topic: "Desktop Publishing: Creating Simple Posters", ai: "Ethical AI: Bias in AI", activity: "Create a 'Buwan ng Wika' poster. Discuss scenarios where AI might be unfair.", assessment: "Poster/flyer creation project" },
+                            { week: 10, topic: "Review and Basic Skills Assessment", ai: "Review of AI Concepts (Q1)", activity: "Hands-on assessment creating a short document and a simple design.", assessment: "Practical Assessment" }
+                        ]
+                    },
+                }
+            },
+            grade8: {
+                title: "Grade 8: Productivity, Collaboration & Data",
+                intro: "The Grade 8 curriculum advances into more complex productivity tools, emphasizing collaboration and introducing the fundamentals of spreadsheets and databases. The AI track explores how artificial intelligence assists in design, data analysis, and ethical considerations like misinformation.",
+                timeline: {
+                    labels: ["Advanced DTP & Slides", "Collaboration", "Spreadsheets & Databases", "Review"],
+                    data: [4, 3, 9, 2]
+                },
+                quarters: {
+                    q1: {
+                        title: "First Quarter: Advanced Productivity & Collaboration",
+                        weeks: [
+                            { week: 2, topic: "Advanced Word Processing (Google Docs)", ai: "AI for Content Generation: Email/Letter Drafting", activity: "Use templates and mail merge concepts. Use an LLM to draft formal emails.", assessment: "Template/Mail Merge setup check" },
+                            { week: 3, topic: "Advanced Desktop Publishing (Canva)", ai: "AI for Image Manipulation: Advanced Canva AI Features", activity: "Create a multi-layered design for a 'Filipino Heroes Day' poster. Use Canva's AI features for image enhancement.", assessment: "Layer/Text formatting exercise" },
+                            { week: 5, topic: "Collaboration Tools (Google Slides)", ai: "AI in Presentations: Content & Design Suggestions", activity: "Create a presentation and use Google Slides' 'Explore' feature for design ideas about Philippine culture.", assessment: "Basic presentation creation" },
+                            { week: 8, topic: "Review of Productivity and Collaboration Tools", ai: "Ethical AI: Misinformation and Deepfakes", activity: "Comprehensive review. Discuss what deepfakes are and the importance of verifying information.", assessment: "Review activities" }
+                        ]
+                    },
+                }
+            },
+            grade9: {
+                title: "Grade 9: Databases, Security & Intro to AI/ML",
+                intro: "The Grade 9 curriculum delves into the structured world of relational databases and cybersecurity. A significant portion of the year is dedicated to introducing foundational programming with Python and the core concepts of Machine Learning, preparing students for more advanced topics.",
+                timeline: {
+                    labels: ["Databases & SQL", "Spreadsheets & Security", "Python & Machine Learning", "Review"],
+                    data: [6, 5, 7, 1]
+                },
+                 quarters: {
+                    q1: {
+                        title: "First Quarter: Database Fundamentals",
+                        weeks: [
+                            { week: 1, topic: "Introduction to Relational Databases", ai: "Data as Fuel for AI", activity: "Discuss real-world databases like school enrollment systems. Identify primary and foreign keys.", assessment: "Q&A on database concepts" },
+                            { week: 6, topic: "Querying Databases: Introduction to SQL", ai: "SQL and AI: How SQL is used to prepare data for AI models.", activity: "Practice simple SELECT statements in an online SQL sandbox. Discuss how data scientists use SQL.", assessment: "SQL SELECT practice" },
+                        ]
+                    },
+                }
+            },
+            grade10: {
+                title: "Grade 10: Advanced Programming & AI Applications",
+                intro: "The Grade 10 curriculum culminates in a capstone project, applying advanced Python programming, data analysis with Pandas, and machine learning concepts. Students explore emerging technologies and the ethical implications of AI, solidifying their comprehensive tech education.",
+                timeline: {
+                    labels: ["Advanced Python", "Data Analysis (Pandas)", "Machine Learning Models", "Capstone Project"],
+                    data: [8, 8, 8, 12]
+                },
+                 quarters: {
+                    q1: {
+                        title: "First Quarter: Advanced Python Programming",
+                        weeks: [
+                            { week: 3, topic: "Python Modules and Packages", ai: "Leveraging AI Libraries", activity: "Import and use functions from modules like math and random. Discuss analogy to importing AI libraries like TensorFlow.", assessment: "Module usage exercise" },
+                            { week: 6, topic: "Object-Oriented Programming (OOP) Concepts", ai: "Object-Oriented AI Design", activity: "Create a simple 'Student' class. Discuss how OOP principles structure large AI systems.", assessment: "Simple class creation" },
+                        ]
+                    },
+                }
+            }
+        };
+
+        let currentGrade = 'grade7';
+        let isAiHighlighted = false;
+        let activeChart = null;
+
+        const contentArea = document.getElementById('content-area');
+        const gradeButtons = {
+            grade7: document.getElementById('btn-grade7'),
+            grade8: document.getElementById('btn-grade8'),
+            grade9: document.getElementById('btn-grade9'),
+            grade10: document.getElementById('btn-grade10'),
+        };
+
+        function createWeekCard(weekData) {
+            const aiSection = weekData.ai ? `
+                <div class="ai-lesson mt-3 pt-3 border-t border-slate-200">
+                    <div class="flex items-start">
+                        <span class="card-icon text-teal-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" /></svg>
+                        </span>
+                        <div>
+                            <h4 class="font-semibold text-sm text-teal-700">Additional AI Lesson</h4>
+                            <p class="text-sm text-slate-600">${weekData.ai}</p>
+                        </div>
+                    </div>
+                </div>` : '';
+
+            return `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex-grow">
+                        <p class="text-sm font-bold text-teal-600 mb-1">Week ${weekData.week}</p>
+                        <h3 class="font-bold text-slate-800 mb-3">${weekData.topic}</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-start">
+                                <span class="card-icon text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg></span>
+                                <p><strong class="font-semibold text-slate-700">Activity:</strong> ${weekData.activity}</p>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="card-icon text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                <p><strong class="font-semibold text-slate-700">Assessment:</strong> ${weekData.assessment}</p>
+                            </div>
+                        </div>
+                    </div>
+                    ${aiSection}
+                </div>
+            `;
+        }
+        
+        function renderGrade(gradeId) {
+            const data = curriculumData[gradeId];
+            if (!data) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+            }
+
+            let quartersHtml = '';
+            for (const qKey in data.quarters) {
+                const quarter = data.quarters[qKey];
+                const weeksHtml = quarter.weeks.map(createWeekCard).join('');
+                quartersHtml += `
+                    <div class="mb-4 border border-slate-200 rounded-lg bg-slate-100/50">
+                        <button class="accordion-toggle w-full text-left p-4 font-bold text-lg text-teal-800 flex justify-between items-center hover:bg-teal-50 rounded-t-lg">
+                            ${quarter.title}
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                ${weeksHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            contentArea.innerHTML = `
+                <div id="${gradeId}-content" class="space-y-8">
+                    <section class="bg-white p-6 rounded-lg shadow-sm text-center">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">${data.title}</h2>
+                        <p class="text-slate-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </section>
+                    
+                    <section class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-slate-800">Yearly Topic Progression</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-medium text-slate-700">Highlight AI Lessons</span>
+                                <label for="ai-toggle" class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="ai-toggle" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-teal-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="timeline-chart"></canvas>
+                        </div>
+                    </section>
+
+                    <section>
+                        ${quartersHtml}
+                    </section>
+                </div>
+            `;
+
+            const ctx = document.getElementById('timeline-chart').getContext('2d');
+            activeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.timeline.labels,
+                    datasets: [{
+                        label: 'Weeks per Topic Block',
+                        data: data.timeline.data,
+                        backgroundColor: ['#14b8a6', '#2dd4bf', '#5eead4', '#99f6e4', '#ccfbf1'],
+                        borderColor: '#0f766e',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Approx. ${context.raw} weeks`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Approximate Number of Weeks' }
+                        }
+                    }
+                }
+            });
+
+            document.querySelectorAll('.accordion-toggle').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    button.querySelector('svg').classList.toggle('rotate-180');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+            
+            const firstAccordion = document.querySelector('.accordion-toggle');
+            if(firstAccordion) {
+                firstAccordion.click();
+            }
+
+            document.getElementById('ai-toggle').addEventListener('change', (e) => {
+                isAiHighlighted = e.target.checked;
+                updateAiHighlight();
+            });
+            
+            document.getElementById('ai-toggle').checked = isAiHighlighted;
+            updateAiHighlight();
+        }
+
+        function updateAiHighlight() {
+            document.querySelectorAll('.ai-lesson').forEach(el => {
+                const card = el.closest('.bg-white');
+                if (isAiHighlighted) {
+                    card.classList.add('ai-highlight');
+                } else {
+                    card.classList.remove('ai-highlight');
+                }
+            });
+        }
+
+        function setActiveButton(gradeId) {
+            Object.values(gradeButtons).forEach(btn => btn.classList.remove('active'));
+            if (gradeButtons[gradeId]) {
+                gradeButtons[gradeId].classList.add('active');
+            }
+        }
+
+        Object.keys(gradeButtons).forEach(gradeId => {
+            gradeButtons[gradeId].addEventListener('click', () => {
+                currentGrade = gradeId;
+                setActiveButton(gradeId);
+                renderGrade(gradeId);
+            });
+        });
+
+        // Initial render
+        setActiveButton(currentGrade);
+        renderGrade(currentGrade);
+
+    </script>
+</body>
+</html>
